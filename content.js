@@ -23,7 +23,10 @@
     pageScriptReady: false,
     requestIdCounter: 0,
     processedElements: new WeakSet(),
-    observerTimeout: null
+    observerTimeout: null,
+    dismissedResetTimestamp: null,
+    currentToast: null,
+    countdownInterval: null
   };
   
   // ==================== LOCATION MAPPINGS (inline for content script) ====================
@@ -315,13 +318,18 @@
   // Handle responses from page script
   window.addEventListener('message', function(event) {
     if (event.source !== window) return;
-    
+
     if (event.data && event.data.type === '__pageScriptReady') {
       state.pageScriptReady = true;
       processQueue();
       return;
     }
-    
+
+    if (event.data && event.data.type === '__rateLimited') {
+      showRateLimitToast(event.data.resetTimestamp);
+      return;
+    }
+
     if (event.data && event.data.type === '__locationResult') {
       const { screenName, data, error } = event.data;
       const key = screenName.toLowerCase();
@@ -343,8 +351,79 @@
     }
   });
   
+  // ==================== RATE LIMIT TOAST ====================
+
+  function showRateLimitToast(resetTimestamp) {
+    // Don't show if this specific countdown was dismissed
+    if (state.dismissedResetTimestamp === resetTimestamp) {
+      return;
+    }
+
+    // Remove existing toast if any
+    hideRateLimitToast();
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = 'x-location-toast';
+
+    const textSpan = document.createElement('span');
+    textSpan.className = 'x-location-toast-text';
+    toast.appendChild(textSpan);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'x-location-toast-close';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.setAttribute('aria-label', 'Close');
+    closeBtn.addEventListener('click', () => {
+      state.dismissedResetTimestamp = resetTimestamp;
+      hideRateLimitToast();
+    });
+    toast.appendChild(closeBtn);
+
+    document.body.appendChild(toast);
+    state.currentToast = toast;
+
+    // Update countdown every second
+    function updateCountdown() {
+      const now = Date.now();
+      const remaining = Math.max(0, Math.ceil((resetTimestamp - now) / 1000));
+
+      if (remaining <= 0) {
+        hideRateLimitToast();
+        // Clear dismissed state so future rate limits show the toast
+        state.dismissedResetTimestamp = null;
+        return;
+      }
+
+      const minutes = Math.floor(remaining / 60);
+      const seconds = remaining % 60;
+      const timeStr = minutes > 0
+        ? `${minutes}m ${seconds}s`
+        : `${seconds}s`;
+
+      textSpan.textContent = `Rate limited. Retry in ${timeStr}`;
+    }
+
+    // Initial update
+    updateCountdown();
+
+    // Start interval
+    state.countdownInterval = setInterval(updateCountdown, 1000);
+  }
+
+  function hideRateLimitToast() {
+    if (state.countdownInterval) {
+      clearInterval(state.countdownInterval);
+      state.countdownInterval = null;
+    }
+    if (state.currentToast) {
+      state.currentToast.remove();
+      state.currentToast = null;
+    }
+  }
+
   // ==================== DOM MANIPULATION ====================
-  
+
   function createBadge(basedInUrl, connectedViaUrl, platformUrl, tooltipText) {
     const container = document.createElement('span');
     container.className = CONFIG.BADGE_CLASS;

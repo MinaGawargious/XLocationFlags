@@ -77,3 +77,57 @@
   width: 14px;
   height: 14px;
 }
+
+/* Rate limit toast */
+.x-location-toast {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1d9bf0;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 999999;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: x-loc-toast-slide-in 0.3s ease-out;
+}
+
+@keyframes x-loc-toast-slide-in {
+  from {
+    transform: translateX(-50%) translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+.x-location-toast-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.x-location-toast-close {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+
+.x-location-toast-close:hover {
+  opacity: 1;
+}
