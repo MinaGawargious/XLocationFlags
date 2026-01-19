@@ -203,7 +203,7 @@
     
     return {
       accountBasedIn: aboutProfile.account_based_in || null,
-      connectedVia: aboutProfile.connected_via || null,
+      connectedVia: aboutProfile.source || null,
       createdAt: aboutProfile.created_at || null
     };
   }
