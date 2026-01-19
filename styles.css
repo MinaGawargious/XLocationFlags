@@ -1,0 +1,79 @@
+/* X Location Badges - Styles */
+
+.x-location-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 4px;
+  vertical-align: middle;
+  cursor: help;
+}
+
+.x-location-badge img {
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.x-location-badge .x-loc-flag {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+}
+
+.x-location-badge .x-loc-platform {
+  width: 14px;
+  height: 14px;
+  opacity: 0.9;
+}
+
+/* Slightly larger badges on profile pages */
+[data-testid="UserName"] .x-location-badge img,
+[data-testid="UserProfileHeader_Items"] .x-location-badge img {
+  width: 18px;
+  height: 18px;
+}
+
+[data-testid="UserName"] .x-location-badge .x-loc-flag,
+[data-testid="UserProfileHeader_Items"] .x-location-badge .x-loc-flag {
+  width: 20px;
+  height: 20px;
+}
+
+/* Animation for loading state */
+@keyframes x-loc-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.x-location-badge.loading {
+  animation: x-loc-pulse 1.5s ease-in-out infinite;
+}
+
+/* Tooltip styling (native title works, but we can enhance later) */
+.x-location-badge:hover {
+  opacity: 0.85;
+}
+
+/* Ensure badges don't break layout */
+.x-location-badge {
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Dark mode adjustments - X is usually dark mode */
+.x-location-badge .x-loc-platform {
+  filter: brightness(0.95);
+}
+
+/* Compact mode for replies/threads */
+[data-testid="cellInnerDiv"] .x-location-badge img {
+  width: 13px;
+  height: 13px;
+}
+
+[data-testid="cellInnerDiv"] .x-location-badge .x-loc-flag {
+  width: 14px;
+  height: 14px;
+}
