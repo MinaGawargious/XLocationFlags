@@ -376,6 +376,11 @@
       container.appendChild(basedInImg);
     }
     
+    if (showVpn) {
+      const vpnIcon = createVpnIcon();
+      container.appendChild(vpnIcon);
+    }
+    
     // Connected-via country flag (if different from based-in)
     if (connectedViaUrl && connectedViaUrl !== basedInUrl) {
       const connectedImg = document.createElement('img');
@@ -392,12 +397,6 @@
       platformImg.className = 'x-loc-platform';
       platformImg.alt = 'Platform';
       container.appendChild(platformImg);
-    }
-    
-    // VPN icon
-    if (showVpn) {
-      const vpnIcon = createVpnIcon();
-      container.appendChild(vpnIcon);
     }
     
     return container;
@@ -513,8 +512,21 @@
       return username.length >= 1 && username.length <= 15 && !reservedPaths.has(username);
     }
     
+    function isElementVisible(el) {
+      // Skip elements that are aria-hidden or have aria-hidden ancestors
+      if (el.getAttribute('aria-hidden') === 'true') return false;
+      if (el.closest('[aria-hidden="true"]')) return false;
+      return true;
+    }
+    
     function addElement(el, screenName) {
-      const key = `${screenName.toLowerCase()}-${el.closest('article')?.dataset?.testid || Math.random()}`;
+      // Skip hidden elements
+      if (!isElementVisible(el)) return;
+      
+      // Use a more unique key based on element's position in DOM
+      const article = el.closest('article');
+      const rect = el.getBoundingClientRect();
+      const key = `${screenName.toLowerCase()}-${article?.dataset?.testid || 'no-article'}-${Math.round(rect.top)}-${Math.round(rect.left)}`;
       if (!seen.has(key)) {
         seen.add(key);
         elements.push(el);
