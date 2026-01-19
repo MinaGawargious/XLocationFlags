@@ -40,7 +40,7 @@
     'israel': 'IL', 'saudi arabia': 'SA', 'united arab emirates': 'AE', 'uae': 'AE',
     'egypt': 'EG', 'south africa': 'ZA', 'nigeria': 'NG', 'kenya': 'KE',
     'argentina': 'AR', 'chile': 'CL', 'colombia': 'CO', 'peru': 'PE',
-    'venezuela': 'VE', 'indonesia': 'ID', 'thailand': 'TH', 'vietnam': 'VN',
+    'venezuela': 'VE', 'indonesia': 'ID', 'thailand': 'TH', 'vietnam': 'VN', 'viet nam': 'VN',
     'philippines': 'PH', 'malaysia': 'MY', 'singapore': 'SG', 'taiwan': 'TW',
     'hong kong': 'HK', 'new zealand': 'NZ', 'pakistan': 'PK', 'bangladesh': 'BD',
     'ukraine': 'UA', 'czech republic': 'CZ', 'czechia': 'CZ', 'romania': 'RO',
