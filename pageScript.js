@@ -185,6 +185,15 @@
     });
     
     if (response.status === 429) {
+      const resetTime = response.headers.get('x-rate-limit-reset');
+      if (resetTime) {
+        const resetDate = new Date(parseInt(resetTime) * 1000);
+        const now = new Date();
+        const waitSeconds = Math.ceil((resetDate - now) / 1000);
+        console.log(`[X-Location] Rate limited. Next request available at ${resetDate.toLocaleTimeString()} (in ${waitSeconds} seconds)`);
+      } else {
+        console.log('[X-Location] Rate limited. Reset time unknown.');
+      }
       throw new Error('Rate limited');
     }
     
