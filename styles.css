@@ -28,9 +28,18 @@
   opacity: 0.9;
 }
 
+.x-location-badge .x-loc-vpn {
+  width: 14px;
+  height: 14px;
+  color: #f4212e;
+  opacity: 0.9;
+}
+
 /* Slightly larger badges on profile pages */
 [data-testid="UserName"] .x-location-badge img,
-[data-testid="UserProfileHeader_Items"] .x-location-badge img {
+[data-testid="UserName"] .x-location-badge svg,
+[data-testid="UserProfileHeader_Items"] .x-location-badge img,
+[data-testid="UserProfileHeader_Items"] .x-location-badge svg {
   width: 18px;
   height: 18px;
 }
@@ -68,7 +77,8 @@
 }
 
 /* Compact mode for replies/threads */
-[data-testid="cellInnerDiv"] .x-location-badge img {
+[data-testid="cellInnerDiv"] .x-location-badge img,
+[data-testid="cellInnerDiv"] .x-location-badge svg {
   width: 13px;
   height: 13px;
 }

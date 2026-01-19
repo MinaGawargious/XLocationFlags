@@ -213,7 +213,8 @@
     return {
       accountBasedIn: aboutProfile.account_based_in || null,
       connectedVia: aboutProfile.source || null,
-      createdAt: aboutProfile.created_at || null
+      createdAt: aboutProfile.created_at || null,
+      locationAccurate: aboutProfile.location_accurate !== false
     };
   }
   
