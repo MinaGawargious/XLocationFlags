@@ -186,6 +186,8 @@
       .replace(/\s*app\s*store\s*$/i, '')
       .replace(/\s*play\s*store\s*$/i, '')
       .replace(/\s*google\s*play\s*$/i, '')
+      .replace(/\s*android\s*app\s*$/i, '')
+      .replace(/\s*ios\s*app\s*$/i, '')    
       .trim();
     
     if (!country || country === 'web' || country === 'browser') {
