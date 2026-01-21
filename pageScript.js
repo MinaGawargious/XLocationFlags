@@ -6,6 +6,102 @@
   let authHeaders = null;
   let headersReady = false;
   
+  // Toast state
+  let toastDismissed = false;
+  let toastInterval = null;
+  
+  function showRateLimitToast(resetTimestamp) {
+    // Don't show if user dismissed it
+    if (toastDismissed) return;
+    
+    // Don't create duplicate
+    if (document.getElementById('x-location-rate-limit-toast')) return;
+    
+    const toast = document.createElement('div');
+    toast.id = 'x-location-rate-limit-toast';
+    toast.style.cssText = `
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      z-index: 999999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border: 1px solid rgba(244, 33, 46, 0.3);
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      color: #e7e9ea;
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    `;
+    
+    toast.innerHTML = `
+      <span style="font-size: 18px; line-height: 1;">⏳</span>
+      <span style="font-weight: 500; white-space: nowrap;">X Location Badges rate limited</span>
+      <span id="x-location-countdown" style="font-weight: 700; color: #f4212e; font-variant-numeric: tabular-nums; min-width: 50px; text-align: center; padding: 4px 10px; background: rgba(244, 33, 46, 0.15); border-radius: 6px;"></span>
+      <button id="x-location-toast-close" style="background: none; border: none; color: #71767b; font-size: 20px; line-height: 1; padding: 0 0 0 8px; cursor: pointer;">×</button>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Close button
+    document.getElementById('x-location-toast-close').onclick = () => {
+      toastDismissed = true;
+      hideRateLimitToast();
+    };
+    
+    // Update countdown
+    function updateCountdown() {
+      const countdown = document.getElementById('x-location-countdown');
+      if (!countdown) return;
+      
+      if (!resetTimestamp) {
+        countdown.textContent = '...';
+        return;
+      }
+      
+      const now = Date.now();
+      const remaining = Math.max(0, resetTimestamp - now);
+      
+      if (remaining <= 0) {
+        hideRateLimitToast();
+        return;
+      }
+      
+      const minutes = Math.floor(remaining / 60000);
+      const seconds = Math.ceil((remaining % 60000) / 1000);
+      
+      countdown.textContent = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+    }
+    
+    updateCountdown();
+    toastInterval = setInterval(updateCountdown, 1000);
+    
+    // Animate in
+    requestAnimationFrame(() => {
+      toast.style.transform = 'translateX(-50%) translateY(0)';
+      toast.style.opacity = '1';
+    });
+  }
+  
+  function hideRateLimitToast() {
+    if (toastInterval) {
+      clearInterval(toastInterval);
+      toastInterval = null;
+    }
+    const toast = document.getElementById('x-location-rate-limit-toast');
+    if (toast) {
+      toast.style.transform = 'translateX(-50%) translateY(-100px)';
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 300);
+    }
+  }
+  
   // Request queue to batch requests and avoid rate limits
   const requestQueue = [];
   let isProcessingQueue = false;
@@ -186,14 +282,21 @@
     
     if (response.status === 429) {
       const resetTime = response.headers.get('x-rate-limit-reset');
+      let resetTimestamp = null;
       if (resetTime) {
-        const resetDate = new Date(parseInt(resetTime) * 1000);
+        resetTimestamp = parseInt(resetTime) * 1000;
+        const resetDate = new Date(resetTimestamp);
         const now = new Date();
         const waitSeconds = Math.ceil((resetDate - now) / 1000);
         console.log(`[X-Location] Rate limited. Next request available at ${resetDate.toLocaleTimeString()} (in ${waitSeconds} seconds)`);
       } else {
-        console.log('[X-Location] Rate limited. Reset time unknown.');
+        // Default to 15 minutes if no reset time provided
+        resetTimestamp = Date.now() + 15 * 60 * 1000;
+        console.log('[X-Location] Rate limited. Reset time unknown, assuming 15 minutes.');
       }
+      
+      showRateLimitToast(resetTimestamp);
+      
       throw new Error('Rate limited');
     }
     
